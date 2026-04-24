@@ -1,0 +1,9 @@
+{
+  "name": "HSK 마스터",
+  "short_name": "HSK",
+  "description": "중국어 단어, 관용어, 사자성어 학습 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d32f2f"
+}
