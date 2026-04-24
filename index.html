@@ -183,6 +183,13 @@ quizIndex++;
 setTimeout(nextQuiz,900);
 }
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
 
+</body>
+</html>
 </body>
 </html>
