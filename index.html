@@ -1,21 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>HSK 마스터</title>
-
-  <link rel="manifest" href="manifest.json">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#d32f2f">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK 마스터</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d32f2f">
+<style>
+body{margin:0;background:#f4f4f4;font-family:Arial,'Noto Sans KR',sans-serif}
+.app{max-width:390px;margin:auto;min-height:100vh;background:white}
+header{background:#d32f2f;color:white;text-align:center;padding:22px}
+header h1{margin:0;font-size:26px}
+section{padding:18px;text-align:center}
+.word{font-size:46px;font-weight:bold;margin-top:15px}
+.pinyin{color:#555}
+.meaning{font-size:18px;margin:8px 0 20px}
+button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:12px;background:#d32f2f;color:white;font-size:16px}
+.gray{background:#555}
+.card{background:#fff;margin:10px 0;padding:15px;border-radius:14px;box-shadow:0 2px 8px #ddd;text-align:left}
+.small{font-size:13px;color:#666}
+.banner{background:#ff6600;color:white;text-align:center;padding:14px;font-weight:bold;position:sticky;bottom:0}
+</style>
 </head>
+<body>
 
-<body style="text-align:center; padding:50px; font-family:sans-serif;">
-  <h1>HSK 앱 🎉</h1>
-  <p>설치 테스트 성공!</p>
+<div class="app">
+<header>
+<h1>HSK 마스터</h1>
+<p>중국어 완전정복</p>
+</header>
 
-  <button onclick="alert('HSK 시작!')" style="padding:15px 30px; font-size:18px;">
-    시작하기
-  </button>
+<section id="home">
+<h3>오늘의 단어</h3>
+<div class="word" id="homeWord">学习</div>
+<div class="pinyin" id="homePinyin">[xuéxí]</div>
+<div class="meaning" id="homeMeaning">학습하다, 공부하다</div>
+
+<button onclick="nextWord()">다음 단어 보기</button>
+<button onclick="showWordBook()">📚 HSK 단어장</button>
+<button onclick="showFavorites()">⭐ 내 단어장</button>
+</section>
+
+<section id="wordBook" style="display:none">
+<h3>📚 HSK 단어장</h3>
+<div id="wordList"></div>
+<button class="gray" onclick="showHome()">홈으로</button>
+</section>
+
+<section id="detail" style="display:none">
+<div id="detailBox"></div>
+<button class="gray" onclick="showWordBook()">목록으로</button>
+</section>
+
+<section id="favorites" style="display:none">
+<h3>⭐ 내 단어장</h3>
+<div id="favList"></div>
+<button class="gray" onclick="showHome()">홈으로</button>
+</section>
+
+<div class="banner">광고 배너 영역</div>
+</div>
+
+<script>
+const words=[
+{w:"学习",p:"xuéxí",m:"학습하다, 공부하다",e:"我学习中文。",t:"나는 중국어를 공부합니다."},
+{w:"你好",p:"nǐ hǎo",m:"안녕하세요",e:"你好，很高兴认识你。",t:"안녕하세요, 만나서 반갑습니다."},
+{w:"谢谢",p:"xièxie",m:"감사합니다",e:"谢谢你的帮助。",t:"도와줘서 감사합니다."},
+{w:"朋友",p:"péngyou",m:"친구",e:"他是我的朋友。",t:"그는 나의 친구입니다."},
+{w:"老师",p:"lǎoshī",m:"선생님",e:"老师教我们中文。",t:"선생님은 우리에게 중국어를 가르칩니다."},
+{w:"苹果",p:"píngguǒ",m:"사과",e:"我喜欢吃苹果。",t:"나는 사과 먹는 것을 좋아합니다."},
+{w:"天气",p:"tiānqì",m:"날씨",e:"今天天气很好。",t:"오늘 날씨가 좋습니다."},
+{w:"医院",p:"yīyuàn",m:"병원",e:"我去医院。",t:"나는 병원에 갑니다."}
+];
+
+let current=0;
+let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
+
+function hideAll(){
+document.querySelectorAll("section").forEach(s=>s.style.display="none");
+}
+
+function showHome(){
+hideAll();
+document.getElementById("home").style.display="block";
+}
+
+function nextWord(){
+current=(current+1)%words.length;
+const x=words[current];
+document.getElementById("homeWord").innerText=x.w;
+document.getElementById("homePinyin").innerText="["+x.p+"]";
+document.getElementById("homeMeaning").innerText=x.m;
+}
+
+function showWordBook(){
+hideAll();
+document.getElementById("wordBook").style.display="block";
+document.getElementById("wordList").innerHTML=words.map((x,i)=>`
+<div class="card" onclick="openDetail(${i})">
+<b style="font-size:24px">${x.w}</b> <span class="small">[${x.p}]</span><br>
+${x.m}
+</div>
+`).join("");
+}
+
+function openDetail(i){
+const x=words[i];
+hideAll();
+document.getElementById("detail").style.display="block";
+document.getElementById("detailBox").innerHTML=`
+<div class="word">${x.w}</div>
+<div class="pinyin">[${x.p}]</div>
+<div class="meaning">${x.m}</div>
+<button onclick="speak('${x.w}')">🔊 발음 듣기</button>
+<button onclick="toggleFav(${i})">${isFav(x)?"⭐ 내 단어장에서 삭제":"☆ 내 단어장에 추가"}</button>
+<div class="card">
+<b>예문</b><br>${x.e}<br>
+<span class="small">${x.t}</span>
+</div>
+`;
+}
+
+function speak(text){
+const u=new SpeechSynthesisUtterance(text);
+u.lang="zh-CN";
+speechSynthesis.speak(u);
+}
+
+function isFav(x){
+return favorites.some(f=>f.w===x.w);
+}
+
+function toggleFav(i){
+const x=words[i];
+if(isFav(x)){
+favorites=favorites.filter(f=>f.w!==x.w);
+}else{
+favorites.push(x);
+}
+localStorage.setItem("favorites",JSON.stringify(favorites));
+openDetail(i);
+}
+
+function showFavorites(){
+hideAll();
+document.getElementById("favorites").style.display="block";
+document.getElementById("favList").innerHTML=favorites.length
+? favorites.map(x=>`
+<div class="card">
+<b style="font-size:24px">${x.w}</b> <span class="small">[${x.p}]</span><br>
+${x.m}<br><span class="small">${x.e}</span>
+</div>`).join("")
+: "<p>아직 저장한 단어가 없습니다.</p>";
+}
+</script>
+
 </body>
 </html>
