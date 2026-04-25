@@ -35,6 +35,7 @@ button{width:100%;padding:15px;margin:9px 0;border:0;border-radius:14px;backgrou
 <button onclick="showCategory('saja')">사자성어</button>
 <button onclick="showCategory('connector')">접속사</button>
 <button class="favorite" onclick="showFavorites()">⭐ 내 즐겨찾기</button>
+<button onclick="startQuiz()">📝 퀴즈 시작</button>
 </section>
 
 <section>
@@ -114,6 +115,69 @@ displayResults(favorites);
 if("serviceWorker" in navigator){
 navigator.serviceWorker.register("service-worker.js");
 }
+let quizList = [];
+let quizIndex = 0;
+let quizScore = 0;
+
+function startQuiz(){
+  quizList = [...data].sort(() => Math.random() - 0.5).slice(0, 5);
+  quizIndex = 0;
+  quizScore = 0;
+  showQuiz();
+}
+
+function showQuiz(){
+  const results = document.getElementById("results");
+  const title = document.getElementById("title");
+
+  if(quizIndex >= quizList.length){
+    title.innerText = "퀴즈 결과";
+    results.innerHTML = `
+      <div class="card">
+        <h3>퀴즈 완료 🎉</h3>
+        <p>점수: ${quizScore} / ${quizList.length}</p>
+        <button onclick="startQuiz()">다시 풀기</button>
+      </div>
+    `;
+    return;
+  }
+
+  const q = quizList[quizIndex];
+  let options = [q.meaning];
+
+  while(options.length < 4){
+    const r = data[Math.floor(Math.random() * data.length)].meaning;
+    if(!options.includes(r)) options.push(r);
+  }
+
+  options.sort(() => Math.random() - 0.5);
+
+  title.innerText = `퀴즈 ${quizIndex + 1} / ${quizList.length}`;
+
+  results.innerHTML = `
+    <div class="card">
+      <h3>${q.word}</h3>
+      <p>[${q.pinyin}]</p>
+      <p>이 단어의 뜻은?</p>
+      ${options.map(o => `<button onclick="checkQuiz('${o}','${q.meaning}')">${o}</button>`).join("")}
+    </div>
+  `;
+}
+
+function checkQuiz(answer, correct){
+  const results = document.getElementById("results");
+
+  if(answer === correct){
+    quizScore++;
+    results.innerHTML += `<p style="color:green;font-weight:bold;">정답입니다 🎉</p>`;
+  }else{
+    results.innerHTML += `<p style="color:red;font-weight:bold;">오답입니다. 정답: ${correct}</p>`;
+  }
+
+  quizIndex++;
+
+  setTimeout(showQuiz, 1000);
+}  
 </script>
 
 </body>
