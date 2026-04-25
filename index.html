@@ -26,168 +26,97 @@ button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:12px;backgrou
 <body>
 
 <div class="app">
+
 <header>
-<h1>HSK 마스터</h1>
-<p>중국어 완전정복</p>
+<h1>중국어 완전 정복 🇨🇳</h1>
+<p>HSK / 관용어 / 사자성어 / 접속사 통합 학습</p>
 </header>
 
-<section id="home">
-<h3>오늘의 단어</h3>
-<div class="word" id="homeWord">学习</div>
-<div class="pinyin" id="homePinyin">[xuéxí]</div>
-<div class="meaning" id="homeMeaning">학습하다, 공부하다</div>
-<button onclick="nextWord()">다음 단어 보기</button>
-<button onclick="showWordBook()">📚 HSK 단어장</button>
-<button onclick="showFavorites()">⭐ 내 단어장</button>
-<button onclick="startQuiz()">📝 퀴즈 시작</button>
+<section>
+<input type="text" id="searchBox" placeholder="단어 / 뜻 검색">
+
+<div style="margin-top:15px;">
+<button onclick="showCategory('hsk')">HSK 단어</button>
+<button onclick="showCategory('idiom')">관용어</button>
+<button onclick="showCategory('saja')">사자성어</button>
+<button onclick="showCategory('connector')">접속사</button>
+</div>
 </section>
 
-<section id="wordBook" style="display:none">
-<h3>📚 HSK 단어장</h3>
-<div id="wordList"></div>
-<button class="gray" onclick="showHome()">홈으로</button>
+<section id="resultArea">
+<h3>검색 결과</h3>
+<div id="results"></div>
 </section>
 
-<section id="detail" style="display:none">
-<div id="detailBox"></div>
-<button class="gray" onclick="showWordBook()">목록으로</button>
-</section>
-
-<section id="favorites" style="display:none">
-<h3>⭐ 내 단어장</h3>
-<div id="favList"></div>
-<button class="gray" onclick="showHome()">홈으로</button>
-</section>
-
-<section id="quiz" style="display:none">
-<h3>📝 HSK 퀴즈</h3>
-<p id="quizCount"></p>
-<div class="word" id="quizWord"></div>
-<div class="pinyin" id="quizPinyin"></div>
-<p>이 단어의 뜻은?</p>
-<div id="quizOptions"></div>
-<h3 id="quizResult"></h3>
-<button class="gray" onclick="showHome()">홈으로</button>
-</section>
-
-<div class="banner">광고 배너 영역</div>
 </div>
 
 <script>
-const words=[
-{w:"学习",p:"xuéxí",m:"학습하다, 공부하다",e:"我学习中文。",t:"나는 중국어를 공부합니다."},
-{w:"你好",p:"nǐ hǎo",m:"안녕하세요",e:"你好，很高兴认识你。",t:"안녕하세요, 만나서 반갑습니다."},
-{w:"谢谢",p:"xièxie",m:"감사합니다",e:"谢谢你的帮助。",t:"도와줘서 감사합니다."},
-{w:"朋友",p:"péngyou",m:"친구",e:"他是我的朋友。",t:"그는 나의 친구입니다."},
-{w:"老师",p:"lǎoshī",m:"선생님",e:"老师教我们中文。",t:"선생님은 우리에게 중국어를 가르칩니다."},
-{w:"苹果",p:"píngguǒ",m:"사과",e:"我喜欢吃苹果。",t:"나는 사과 먹는 것을 좋아합니다."},
-{w:"天气",p:"tiānqì",m:"날씨",e:"今天天气很好。",t:"오늘 날씨가 좋습니다."},
-{w:"医院",p:"yīyuàn",m:"병원",e:"我去医院。",t:"나는 병원에 갑니다."}
+const data = [
+{
+category:"hsk",
+word:"爱",
+pinyin:"ài",
+meaning:"사랑하다",
+example:"我爱你",
+translation:"나는 너를 사랑해"
+},
+{
+category:"idiom",
+word:"拍马屁",
+pinyin:"pāi mǎ pì",
+meaning:"아부하다",
+example:"他总是拍马屁",
+translation:"그는 늘 아부한다"
+},
+{
+category:"saja",
+word:"画龙点睛",
+pinyin:"huà lóng diǎn jīng",
+meaning:"화룡점정",
+example:"最后一句是画龙点睛",
+translation:"마지막 문장이 핵심이다"
+},
+{
+category:"connector",
+word:"因为",
+pinyin:"yīnwèi",
+meaning:"왜냐하면",
+example:"因为下雨，所以没去",
+translation:"비가 와서 가지 않았다"
+}
 ];
 
-let current=0;
-let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
-let quizIndex=0;
-let score=0;
-let quizWord=null;
-
-function hideAll(){document.querySelectorAll("section").forEach(s=>s.style.display="none");}
-function showHome(){hideAll();document.getElementById("home").style.display="block";}
-
-function nextWord(){
-current=(current+1)%words.length;
-const x=words[current];
-homeWord.innerText=x.w;
-homePinyin.innerText="["+x.p+"]";
-homeMeaning.innerText=x.m;
+function showCategory(category){
+const filtered=data.filter(item=>item.category===category);
+displayResults(filtered);
 }
 
-function showWordBook(){
-hideAll(); wordBook.style.display="block";
-wordList.innerHTML=words.map((x,i)=>`
-<div class="card" onclick="openDetail(${i})">
-<b style="font-size:24px">${x.w}</b> <span class="small">[${x.p}]</span><br>${x.m}
-</div>`).join("");
-}
+document.getElementById("searchBox").addEventListener("input", function(){
+const keyword=this.value.toLowerCase();
 
-function openDetail(i){
-const x=words[i]; hideAll(); detail.style.display="block";
-detailBox.innerHTML=`
-<div class="word">${x.w}</div>
-<div class="pinyin">[${x.p}]</div>
-<div class="meaning">${x.m}</div>
-<button onclick="speak('${x.w}')">🔊 발음 듣기</button>
-<button onclick="toggleFav(${i})">${isFav(x)?"⭐ 내 단어장에서 삭제":"☆ 내 단어장에 추가"}</button>
-<div class="card"><b>예문</b><br>${x.e}<br><span class="small">${x.t}</span></div>`;
-}
+const filtered=data.filter(item =>
+item.word.includes(keyword) ||
+item.meaning.includes(keyword)
+);
 
-function speak(text){
-const u=new SpeechSynthesisUtterance(text);
-u.lang="zh-CN";
-speechSynthesis.speak(u);
-}
+displayResults(filtered);
+});
 
-function isFav(x){return favorites.some(f=>f.w===x.w);}
-function toggleFav(i){
-const x=words[i];
-favorites=isFav(x)?favorites.filter(f=>f.w!==x.w):[...favorites,x];
-localStorage.setItem("favorites",JSON.stringify(favorites));
-openDetail(i);
-}
+function displayResults(items){
+const results=document.getElementById("results");
+results.innerHTML="";
 
-function showFavorites(){
-hideAll(); favorites.style.display="block";
-favList.innerHTML=favorites.length
-? favorites.map(x=>`<div class="card"><b style="font-size:24px">${x.w}</b> [${x.p}]<br>${x.m}<br><span class="small">${x.e}</span></div>`).join("")
-: "<p>아직 저장한 단어가 없습니다.</p>";
-}
-
-function startQuiz(){
-quizIndex=0; score=0;
-hideAll(); quiz.style.display="block";
-nextQuiz();
-}
-
-function nextQuiz(){
-if(quizIndex>=5){
-quizWord.innerText="완료!";
-quizPinyin.innerText="";
-quizOptions.innerHTML="";
-quizCount.innerText="";
-quizResult.innerText=`점수: ${score} / 5`;
-return;
-}
-
-quizWord=words[Math.floor(Math.random()*words.length)];
-document.getElementById("quizWord").innerText=quizWord.w;
-document.getElementById("quizPinyin").innerText="["+quizWord.p+"]";
-document.getElementById("quizCount").innerText=`${quizIndex+1} / 5 문제`;
-document.getElementById("quizResult").innerText="";
-
-let options=[quizWord.m];
-while(options.length<4){
-let r=words[Math.floor(Math.random()*words.length)].m;
-if(!options.includes(r)) options.push(r);
-}
-options.sort(()=>Math.random()-0.5);
-
-quizOptions.innerHTML=options.map(o=>`<button onclick="checkAnswer('${o}')">${o}</button>`).join("");
-}
-
-function checkAnswer(answer){
-if(answer===quizWord.m){
-score++;
-quizResult.innerText="정답입니다! 🎉";
-}else{
-quizResult.innerText=`오답입니다. 정답: ${quizWord.m}`;
-}
-quizIndex++;
-setTimeout(nextQuiz,900);
-}
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
+items.forEach(item=>{
+results.innerHTML += `
+<div class="card">
+<h3>${item.word}</h3>
+<p>${item.pinyin}</p>
+<p>${item.meaning}</p>
+<p>예문: ${item.example}</p>
+<p>해석: ${item.translation}</p>
+</div>
+`;
+});
 }
 </script>
 
