@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4353107740861908"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4353107740861908" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HSK 마스터</title>
@@ -11,112 +10,109 @@
 <style>
 body{margin:0;background:#f4f4f4;font-family:Arial,'Noto Sans KR',sans-serif}
 .app{max-width:390px;margin:auto;min-height:100vh;background:white}
-header{background:#d32f2f;color:white;text-align:center;padding:22px}
+header{background:#d32f2f;color:white;text-align:center;padding:28px}
+header h1{font-size:32px}
 section{padding:18px;text-align:center}
-.word{font-size:46px;font-weight:bold;margin-top:15px}
-.pinyin{color:#555}
-.meaning{font-size:18px;margin:8px 0 20px}
-button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:12px;background:#d32f2f;color:white;font-size:16px}
+input{padding:9px;width:70%;font-size:16px}
+button{width:100%;padding:15px;margin:9px 0;border:0;border-radius:14px;background:#d32f2f;color:white;font-size:18px}
 .gray{background:#555}
-.card{background:#fff;margin:10px 0;padding:15px;border-radius:14px;box-shadow:0 2px 8px #ddd;text-align:left}
-.small{font-size:13px;color:#666}
-.banner{background:#ff6600;color:white;text-align:center;padding:14px;font-weight:bold;position:sticky;bottom:0}
+.card{background:white;margin:18px 0;padding:20px;border-radius:16px;box-shadow:0 2px 12px #ddd;text-align:left;font-size:18px}
+.favorite{background:#ff9800}
 </style>
 </head>
+
 <body>
-
 <div class="app">
-
 <header>
-<h1>중국어 완전 정복 🇨🇳</h1>
+<h1>중국어 완전 정복 CN</h1>
 <p>HSK / 관용어 / 사자성어 / 접속사 통합 학습</p>
 </header>
 
 <section>
-<input type="text" id="searchBox" placeholder="단어 / 뜻 검색">
-
-<div style="margin-top:15px;">
+<input id="searchBox" placeholder="단어 / 뜻 검색">
 <button onclick="showCategory('hsk')">HSK 단어</button>
 <button onclick="showCategory('idiom')">관용어</button>
 <button onclick="showCategory('saja')">사자성어</button>
 <button onclick="showCategory('connector')">접속사</button>
-</div>
+<button class="favorite" onclick="showFavorites()">⭐ 내 즐겨찾기</button>
 </section>
 
-<section id="resultArea">
-<h3>검색 결과</h3>
+<section>
+<h2 id="title">검색 결과</h2>
 <div id="results"></div>
 </section>
-
 </div>
 
 <script>
-const data = [
-{
-category:"hsk",
-word:"爱",
-pinyin:"ài",
-meaning:"사랑하다",
-example:"我爱你",
-translation:"나는 너를 사랑해"
-},
-{
-category:"idiom",
-word:"拍马屁",
-pinyin:"pāi mǎ pì",
-meaning:"아부하다",
-example:"他总是拍马屁",
-translation:"그는 늘 아부한다"
-},
-{
-category:"saja",
-word:"画龙点睛",
-pinyin:"huà lóng diǎn jīng",
-meaning:"화룡점정",
-example:"最后一句是画龙点睛",
-translation:"마지막 문장이 핵심이다"
-},
-{
-category:"connector",
-word:"因为",
-pinyin:"yīnwèi",
-meaning:"왜냐하면",
-example:"因为下雨，所以没去",
-translation:"비가 와서 가지 않았다"
-}
+const data=[
+{category:"hsk",word:"爱",pinyin:"ài",meaning:"사랑하다",example:"我爱你",translation:"나는 너를 사랑해"},
+{category:"idiom",word:"拍马屁",pinyin:"pāi mǎ pì",meaning:"아부하다",example:"他总是拍马屁",translation:"그는 늘 아부한다"},
+{category:"saja",word:"画龙点睛",pinyin:"huà lóng diǎn jīng",meaning:"화룡점정",example:"最后一句是画龙点睛",translation:"마지막 문장이 핵심이다"},
+{category:"connector",word:"因为",pinyin:"yīnwèi",meaning:"왜냐하면",example:"因为下雨，所以没去",translation:"비가 와서 가지 않았다"}
 ];
 
-function showCategory(category){
-const filtered=data.filter(item=>item.category===category);
-displayResults(filtered);
-}
-
-document.getElementById("searchBox").addEventListener("input", function(){
-const keyword=this.value.toLowerCase();
-
-const filtered=data.filter(item =>
-item.word.includes(keyword) ||
-item.meaning.includes(keyword)
-);
-
-displayResults(filtered);
-});
+let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
 
 function displayResults(items){
 const results=document.getElementById("results");
 results.innerHTML="";
+if(items.length===0){results.innerHTML="<p>검색 결과가 없습니다.</p>";return;}
 
-items.forEach(item=>{
-results.innerHTML += `
+items.forEach((item,i)=>{
+const saved=favorites.some(f=>f.word===item.word);
+results.innerHTML+=`
 <div class="card">
 <h3>${item.word}</h3>
 <p>${item.pinyin}</p>
 <p>${item.meaning}</p>
 <p>예문: ${item.example}</p>
 <p>해석: ${item.translation}</p>
-</div>
-`;
+<button onclick="toggleFavorite('${item.word}')">${saved?"⭐ 즐겨찾기 삭제":"☆ 즐겨찾기 추가"}</button>
+</div>`;
 });
+}
+
+function showCategory(category){
+document.getElementById("title").innerText =
+category==="hsk"?"HSK 단어":
+category==="idiom"?"관용어":
+category==="saja"?"사자성어":"접속사";
+
+displayResults(data.filter(item=>item.category===category));
+}
+
+document.getElementById("searchBox").addEventListener("input",function(){
+const keyword=this.value.toLowerCase();
+const filtered=data.filter(item =>
+item.word.includes(keyword) ||
+item.pinyin.toLowerCase().includes(keyword) ||
+item.meaning.includes(keyword)
+);
+document.getElementById("title").innerText="검색 결과";
+displayResults(filtered);
+});
+
+function toggleFavorite(word){
+const item=data.find(x=>x.word===word);
+const exists=favorites.some(f=>f.word===word);
+
+if(exists){
+favorites=favorites.filter(f=>f.word!==word);
+}else{
+favorites.push(item);
+}
+
+localStorage.setItem("favorites",JSON.stringify(favorites));
+displayResults(data.filter(x=>x.word===word));
+}
+
+function showFavorites(){
+document.getElementById("title").innerText="⭐ 내 즐겨찾기";
+displayResults(favorites);
+}
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
